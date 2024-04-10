@@ -132,7 +132,7 @@ def removeZeros(csv, var):
 
 def getTimeTotal(csv):
     df = pd.read_csv(csv)
-    time = df['Time'].iloc[0] - df['Time'].iloc[-1]
+    time =  df['Time'].iloc[-1] - df['Time'].iloc[0]
     return time
 
 def getSingleCsvData(csv):
@@ -221,55 +221,59 @@ def getCsvData(directory, case):
                 print('processing recordedData01')
                 csvPath = folders[i] + '\\' + j
                 print(csvPath)
-                time01 = getTimeTotal(csvPath)
-                laser_df01 = removeZeros(csvPath, 'RayCast')
-                laser_clust01 = getLazerClusters(laser_df01, 'RayCast')
-                laser_centroids01 = laser_clust01[1]
+                df = pd.read_csv(csvPath)
+                if not df.empty and len(df['Time']) > 0:
+                    time01 = getTimeTotal(csvPath)
+                    laser_df01 = removeZeros(csvPath, 'RayCast')
+                    laser_clust01 = getLazerClusters(laser_df01, 'RayCast')
+                    laser_centroids01 = laser_clust01[1]
 
-                waypoint_df01 = removeZeros(csvPath, 'BlueSphere')
-                waypoint_clust01 = getLazerClusters(waypoint_df01, 'BlueSphere')
-                waypoint_centroids01 = waypoint_clust01[1]
-                
-                numWaypoints01 = getNumberAndCoordinatesOfWaypoints(waypoint_df01)[0]
+                    waypoint_df01 = removeZeros(csvPath, 'BlueSphere')
+                    waypoint_clust01 = getLazerClusters(waypoint_df01, 'BlueSphere')
+                    waypoint_centroids01 = waypoint_clust01[1]
+                    
+                    numWaypoints01 = getNumberAndCoordinatesOfWaypoints(waypoint_df01)[0]
 
-                error01 = errorAnalysis(waypoint_centroids01, laser_centroids01)[0]
-                pathSmoothness01 = getPathSmoothness(op_laser_df01['RayCastX'], op_laser_df01['RayCastZ'], op_laser_df01['Time'])
-                averageVelo01 = pathSmoothness01[0]
-                averageAcc01 = pathSmoothness01[1]
-                averageJerk01 = pathSmoothness01[2]
-                distance01 = pathSmoothness01[3]
-                waypoint_errorComp01 = errorAnalysis(op_waypoint_centroids01, waypoint_centroids01)[0]
-                laser_errorComp01 = errorAnalysis(op_laser_centroids01, laser_centroids01)[0]
-                analysisData01.append([numWaypoints01, error01, averageVelo01, averageAcc01, averageJerk01, distance01, time01, waypoint_errorComp01, laser_errorComp01])
-                print('\nnumber of waypoints: ', numWaypoints01, "\nnumber of waypoint centroids: ", len(waypoint_centroids01), 
-                    "\nnumber of laser centroids: ", len(laser_centroids01))
+                    error01 = errorAnalysis(waypoint_centroids01, laser_centroids01)[0]
+                    pathSmoothness01 = getPathSmoothness(op_laser_df01['RayCastX'], op_laser_df01['RayCastZ'], op_laser_df01['Time'])
+                    averageVelo01 = pathSmoothness01[0]
+                    averageAcc01 = pathSmoothness01[1]
+                    averageJerk01 = pathSmoothness01[2]
+                    distance01 = pathSmoothness01[3]
+                    waypoint_errorComp01 = errorAnalysis(op_waypoint_centroids01, waypoint_centroids01)[0]
+                    laser_errorComp01 = errorAnalysis(op_laser_centroids01, laser_centroids01)[0]
+                    analysisData01.append([numWaypoints01, error01, averageVelo01, averageAcc01, averageJerk01, distance01, time01, waypoint_errorComp01, laser_errorComp01])
+                    print('\nnumber of waypoints: ', numWaypoints01, "\nnumber of waypoint centroids: ", len(waypoint_centroids01), 
+                        "\nnumber of laser centroids: ", len(laser_centroids01))
 
             elif j == 'recordedData02.csv':
                 print('processing recordedData02')
                 csvPath = folders[i] + '\\' + j
                 print(csvPath)
-                time02 = getTimeTotal(csvPath)
-                laser_df02 = removeZeros(csvPath, 'RayCast')
-                laser_clust02 = getLazerClusters(laser_df02, 'RayCast')
-                laser_centroids02 = laser_clust02[1]
+                df = pd.read_csv(csvPath)
+                if not df.empty and len(df['Time']) > 0:
+                    time02 = getTimeTotal(csvPath)
+                    laser_df02 = removeZeros(csvPath, 'RayCast')
+                    laser_clust02 = getLazerClusters(laser_df02, 'RayCast')
+                    laser_centroids02 = laser_clust02[1]
 
-                waypoint_df02 = removeZeros(csvPath, 'BlueSphere')
-                waypoint_clust02 = getLazerClusters(waypoint_df02, 'BlueSphere')
-                waypoint_centroids02 = waypoint_clust02[1]
+                    waypoint_df02 = removeZeros(csvPath, 'BlueSphere')
+                    waypoint_clust02 = getLazerClusters(waypoint_df02, 'BlueSphere')
+                    waypoint_centroids02 = waypoint_clust02[1]
 
-                numWaypoints02 = getNumberAndCoordinatesOfWaypoints(waypoint_df02)[0]
+                    numWaypoints02 = getNumberAndCoordinatesOfWaypoints(waypoint_df02)[0]
 
-                error02 = errorAnalysis(waypoint_centroids02, laser_centroids02)[0]
-                pathSmoothness02 = getPathSmoothness(op_laser_df02['RayCastX'], op_laser_df02['RayCastZ'], op_laser_df02['Time'])
-                averageVelo02 = pathSmoothness02[0]
-                averageAcc02 = pathSmoothness02[1]
-                averageJerk02 = pathSmoothness02[2]
-                distance02 = pathSmoothness02[3]
-                waypoint_errorComp02 = errorAnalysis(op_waypoint_centroids02, waypoint_centroids02)[0]
-                laser_errorComp02 = errorAnalysis(op_laser_centroids02, laser_centroids02)[0]
-                analysisData02.append([numWaypoints02, error02, averageVelo02, averageAcc02, averageJerk02, distance02, time02, waypoint_errorComp02, laser_errorComp02])
-                print('\nnumber of waypoints: ', numWaypoints02, "\nnumber of waypoint centroids: ", len(waypoint_centroids02), 
-                    "\nnumber of laser centroids: ", len(laser_centroids02))
+                    error02 = errorAnalysis(waypoint_centroids02, laser_centroids02)[0]
+                    pathSmoothness02 = getPathSmoothness(op_laser_df02['RayCastX'], op_laser_df02['RayCastZ'], op_laser_df02['Time'])
+                    averageVelo02 = pathSmoothness02[0]
+                    averageAcc02 = pathSmoothness02[1]
+                    averageJerk02 = pathSmoothness02[2]
+                    distance02 = pathSmoothness02[3]
+                    waypoint_errorComp02 = errorAnalysis(op_waypoint_centroids02, waypoint_centroids02)[0]
+                    laser_errorComp02 = errorAnalysis(op_laser_centroids02, laser_centroids02)[0]
+                    analysisData02.append([numWaypoints02, error02, averageVelo02, averageAcc02, averageJerk02, distance02, time02, waypoint_errorComp02, laser_errorComp02])
+                    print('\nnumber of waypoints: ', numWaypoints02, "\nnumber of waypoint centroids: ", len(waypoint_centroids02), 
+                        "\nnumber of laser centroids: ", len(laser_centroids02))
 
     avgNumWaypoints01 = 0
     avgError01 = 0
@@ -334,10 +338,24 @@ def getCsvData(directory, case):
 
     avgs01 = [avgNumWaypoints01, avgError01, avgVelo01, avgAcc01, avgJerk01, avgDistance01, avgTime01, avgWaypointErrorComp01, avgLaserErrorComp01]
     avgs02 = [avgNumWaypoints02, avgError02, avgVelo02, avgAcc02, avgJerk02, avgDistance02, avgTime02, avgWaypointErrorComp02, avgLaserErrorComp02]
-    return avgs01, avgs02, optimalDataComp01, optimalDataComp01
+    return avgs01, avgs02, optimalDataComp01, optimalDataComp02
 
-def plotData(data, title):
-     for i in range(0, len(files)):
+def plotData(directory, case):
+    caseUsers = directory + '\\' + case
+    optimalCsvFile01 = directory + '\\tristanOptimalPath\\recordedData01.csv'
+    optimalCsvFile02 = directory + '\\tristanOptimalPath\\recordedData02.csv'
+    files = os.listdir(caseUsers)
+    folders = []
+    fig1 = plt.figure()
+    ax1 = fig1.add_subplot(111)
+    fig2 = plt.figure()
+    ax2 = fig2.add_subplot(111)
+    iteration = 0
+    df1s = []
+    df1s_wp = []
+    df2s = []
+    df2s_wp = []
+    for i in range(0, len(files)):
         folders.append(caseUsers + '\\' + files[i])
     for i in range(0, len(folders)):
         csv_and_meta_files = os.listdir(folders[i])
@@ -345,3 +363,84 @@ def plotData(data, title):
             if 'meta' in j:
                 pass
             elif j == 'recordedData01.csv':
+                iteration +=1
+                csvPath = folders[i] + '\\' + j
+                df1 = pd.read_csv(csvPath)
+                if not df1.empty and len(df1['Time']) > 0:
+                    mask1 = (df1['RayCastX'] != 0) & (df1['RayCastY'] != 0) & (df1['RayCastZ'] != 0)
+                    new_df1 = df1[mask1].reset_index(drop=True)
+                    new_df1.loc[:, 'RayCastX'] = round(new_df1.loc[:, 'RayCastX'], 3)
+                    # Assuming 'df' is your DataFrame and 'col' is the column where you want to remove duplicates
+                    new_df1 = new_df1.drop_duplicates(subset='RayCastX', keep='first')
+                    mask1_wp = (df2['BlueSphereX'] != 0) & (df2['BlueSphereY'] != 0) & (df2['BlueSphereZ'] != 0)
+                    new_df1_wp = df2[mask1_wp].reset_index(drop=True)
+                    new_df1_wp.loc[:, 'BlueSphereX'] = round(new_df1_wp.loc[:, 'BlueSphereX'], 3)
+                    # Assuming 'df' is your DataFrame and 'col' is the column where you want to remove duplicates
+                    new_df1_wp = new_df1_wp.drop_duplicates(subset='BlueSphereX', keep='first')
+                    # df1s[f'new_df{iteration}'] = new_df1
+                    df1s.append(new_df1)
+
+                # ax1.scatter(new_df1['RayCastX'], new_df1['RayCastZ'],label = 'novice')
+            elif j == 'recordedData02.csv':
+                csvPath = folders[i] + '\\' + j
+                df2 = pd.read_csv(csvPath)
+                if not df2.empty and len(df2['Time']) > 0:
+                    mask2 = (df2['RayCastX'] != 0) & (df2['RayCastY'] != 0) & (df2['RayCastZ'] != 0)
+                    new_df2 = df2[mask2].reset_index(drop=True)
+                    new_df2.loc[:, 'RayCastX'] = round(new_df2.loc[:, 'RayCastX'], 3)
+                    # Assuming 'df' is your DataFrame and 'col' is the column where you want to remove duplicates
+                    new_df2 = new_df2.drop_duplicates(subset='RayCastX', keep='first')
+                    mask2_wp = (df2['BlueSphereX'] != 0) & (df2['BlueSphereY'] != 0) & (df2['BlueSphereZ'] != 0)
+                    new_df2_wp = df2[mask2_wp].reset_index(drop=True)
+                    new_df2_wp.loc[:, 'BlueSphereX'] = round(new_df2.loc[:, 'BlueSphereX'], 3)
+                    # Assuming 'df' is your DataFrame and 'col' is the column where you want to remove duplicates
+                    new_df2_wp = new_df2_wp.drop_duplicates(subset='BlueSphereX', keep='first')
+                    # df2s[f'new_df{iteration}'] = new_df2
+                    # ax2.scatter(new_df2['RayCastX'], new_df2['RayCastZ'], label = 'novice')
+                    df2s.append(new_df2)
+                    df2s_wp.append(new_df2_wp)
+
+    df1 = pd.read_csv(optimalCsvFile01)
+    mask1 = (df1['RayCastX'] != 0) & (df1['RayCastY'] != 0) & (df1['RayCastZ'] != 0)
+    new_df1 = df1[mask1].reset_index(drop=True)
+    coordinatesList = []
+    # for df in df1s:
+    #     print(isinstance(df, pd.DataFrame))
+
+
+    all_dfs = pd.concat(df1s)
+
+    # Group by 'x' and calculate the mean of 'y' values
+    grouped = all_dfs.groupby('RayCastX', as_index=False)['RayCastZ'].mean()
+
+    # Create the list of (x, y) pairs
+    xy_pairs = list(grouped.itertuples(index=False, name=None))
+    xs, ys = zip(*xy_pairs)
+
+    ax1.scatter(xs,ys, label = 'Combined Novice')
+    ax1.scatter(new_df1['RayCastX'], new_df1['RayCastZ'], label = 'expert')
+    ax1.set_xlabel('Horizontal Position on Placenta')  # Add your X-axis label here
+    ax1.set_ylabel('Vertical Position on Placenta')  # Add your Y-axis label here
+    ax1.set_title('First Run (no assistance)')  # Add your title here
+    ax1.legend()  # This will add the legend to the plot
+
+    all_dfs = pd.concat(df2s)
+
+    # Group by 'x' and calculate the mean of 'y' values
+    grouped = all_dfs.groupby('RayCastX', as_index=False)['RayCastZ'].mean()
+
+    # Create the list of (x, y) pairs
+    xy_pairs = list(grouped.itertuples(index=False, name=None))
+    xs, ys = zip(*xy_pairs)
+
+    ax2.scatter(xs,ys, label = 'combined')
+    df2 = pd.read_csv(optimalCsvFile02)
+    mask2 = (df2['RayCastX'] != 0) & (df2['RayCastY'] != 0) & (df2['RayCastZ'] != 0)
+    new_df2 = df2[mask2].reset_index(drop=True)
+    ax2.scatter(new_df2['RayCastX'], new_df2['RayCastZ'], label = 'expert')
+    ax2.set_xlabel('Horizontal Position on Placenta')  # Add your X-axis label here
+    ax2.set_ylabel('Vertical Position on Placenta')  # Add your Y-axis label here
+    ax2.set_title(f'Second Run ({case} assistance)')  # Add your title here
+    ax2.legend()  # This will add the legend to the plot
+    
+    return df1s, df2s
