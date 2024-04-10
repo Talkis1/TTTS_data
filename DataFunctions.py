@@ -11,40 +11,6 @@ def getDirectoriesInDir(directory):
     directories = [d for d in all_files_and_dirs if os.path.isdir(os.path.join(directory, d))]
     return directories
 
-def processData(directories):
-    firstRunTime = []
-    firstRunObjectPosition = []
-    firstRunRayCast = []
-    firstRunWaypoint = []
-    secondRunTime = []
-    secondRunObjectPosition = []
-    secondRunRayCast = []
-    secondRunWaypoint = []
-    for directory in directories:
-        files = os.listdir(directory)
-        for file in files:
-            if os.path.splitext(file)[2] == '.meta':
-                pass
-            elif file == 'recordedData00.csv':
-                df = pd.read_csv(directory + '/' + file)
-                firstRunTime.append(df['Time'].values)
-                firstRunObjectPosition.append([df['ObjectPositionX'].values, df['ObjectPositionY'].values, df['ObjectPositionZ'].values])
-                firstRunRayCast.append(df['RayCastX'].values, df['RayCastY'].values, df['RayCastZ'].values)
-                firstRunWaypoint.append(df['BlueSphereX'].values, df['BlueSphereY'].values, df['BlueSphereZ'].values)
-            elif file == 'recordedData01.csv':
-                df = pd.read_csv(directory + '/' + file)
-                secondRunTime.append(df['Time'].values)
-                secondRunObjectPosition.append([df['ObjectPositionX'].values, df['ObjectPositionY'].values, df['ObjectPositionZ'].values])
-                secondRunRayCast.append(df['RayCastX'].values, df['RayCastY'].values, df['RayCastZ'].values)
-                secondRunWaypoint.append(df['BlueSphereX'].values, df['BlueSphereY'].values, df['BlueSphereZ'].values)
-
-def getAverageTime(timeList):
-    timeTotal = 0
-    for times in timeList:
-        timeTotal += times[len(times)-1] - times[0]
-    timeAverage = timeTotal / len(timeList)
-    return timeAverage
-
 def getAverageData(dataList):
     dataTot = 0
     dataAvg = 0
@@ -119,7 +85,10 @@ def errorAnalysis(waypoints, lasers):
     return totalError, min_pair_list
 
 def getPathSmoothness(positionX, positionZ, time):
-
+    totalDistance = 0
+    for i in range(0, len(positionX)-1):
+        totalDistance += np.sqrt((positionX[i+1] - positionX[i])**2 + (positionZ[i+1] - positionZ[i])**2)
+    
     cumulativeVelo = 0
     currentVelo = 0
     veloList = []
@@ -147,7 +116,7 @@ def getPathSmoothness(positionX, positionZ, time):
         jerkList.append(currentJerk)
     averageJerk = cumulativeJerk / (len(jerkList))
 
-    return averageVelo, averageAcceleration, averageJerk
+    return averageVelo, averageAcceleration, averageJerk, totalDistance
 
 def removeZeros(csv, var):
     # this takes a csv file and returns a dataframe
@@ -156,6 +125,11 @@ def removeZeros(csv, var):
     mask = (df[var + 'X'] != 0) & (df[var + 'Y'] != 0) & (df[var + 'Z'] != 0)
     new_df = df[mask].reset_index(drop=True)
     return new_df
+
+def getTimeTotal(csv):
+    df = pd.read_csv(csv)
+    time = df['Time'].iloc[0] - df['Time'].iloc[-1]
+    return time
 
 def getCsvData(directory, case):
     # case is a string and is either: haptic, hololens, nothing, everything, or minimap
@@ -176,6 +150,7 @@ def getCsvData(directory, case):
                 print('processing recordedData01')
                 csvPath = folders[i] + '\\' + j
                 print(csvPath)
+                time01 = getTimeTotal(csvPath)
                 laser_df01 = removeZeros(csvPath, 'RayCast')
                 laser_clust01 = getLazerClusters(laser_df01, 'RayCast')
                 laser_centroids01 = laser_clust01[1]
@@ -190,13 +165,15 @@ def getCsvData(directory, case):
                 averageVelo01 = getPathSmoothness(laser_df01['RayCastX'], laser_df01['RayCastZ'], laser_df01['Time'])[0]
                 averageAcc01 = getPathSmoothness(laser_df01['RayCastX'], laser_df01['RayCastZ'], laser_df01['Time'])[1]
                 averageJerk01 = getPathSmoothness(laser_df01['RayCastX'], laser_df01['RayCastZ'], laser_df01['Time'])[2]
-                analysisData01.append([numWaypoints01, error01, averageVelo01, averageAcc01, averageJerk01])
+                distance01 = getPathSmoothness(laser_df01['RayCastX'], laser_df01['RayCastZ'], laser_df01['Time'])[3]
+                analysisData01.append([numWaypoints01, error01, averageVelo01, averageAcc01, averageJerk01, distance01, time01])
                 print('\nnumber of waypoints: ', numWaypoints01, "\nnumber of waypoint centroids: ", len(waypoint_centroids01))
 
             elif j == 'recordedData02.csv':
                 print('processing recordedData02')
                 csvPath = folders[i] + '\\' + j
                 print(csvPath)
+                time02 = getTimeTotal(csvPath)
                 laser_df02 = removeZeros(csvPath, 'RayCast')
                 laser_clust02 = getLazerClusters(laser_df02, 'RayCast')
                 laser_centroids02 = laser_clust02[1]
@@ -211,7 +188,8 @@ def getCsvData(directory, case):
                 averageVelo02 = getPathSmoothness(laser_df02['RayCastX'], laser_df02['RayCastZ'], laser_df02['Time'])[0]
                 averageAcc02 = getPathSmoothness(laser_df02['RayCastX'], laser_df02['RayCastZ'], laser_df02['Time'])[1]
                 averageJerk02 = getPathSmoothness(laser_df02['RayCastX'], laser_df02['RayCastZ'], laser_df02['Time'])[2]
-                analysisData02.append([numWaypoints02, error02, averageVelo02, averageAcc02, averageJerk02])
+                distance02 = getPathSmoothness(laser_df02['RayCastX'], laser_df02['RayCastZ'], laser_df02['Time'])[3]
+                analysisData02.append([numWaypoints02, error02, averageVelo02, averageAcc02, averageJerk02, distance02, time02])
                 print('\nnumber of waypoints: ', numWaypoints02, "\nnumber of waypoint centroids: ", len(waypoint_centroids02))
 
     avgNumWaypoints01 = 0
@@ -219,34 +197,46 @@ def getCsvData(directory, case):
     avgVelo01 = 0
     avgAcc01 = 0
     avgJerk01 = 0
+    avgDistance01 = 0
+    avgTime01 = 0
     for i in range(0, len(analysisData01)):
         avgNumWaypoints01 += analysisData01[i][0]
         avgError01 += analysisData01[i][1]
         avgVelo01 += analysisData01[i][2]
         avgAcc01 += analysisData01[i][3]
         avgJerk01 += analysisData01[i][4]
+        avgDistance01 += analysisData01[i][5]
+        avgTime01 += analysisData01[i][6]
     avgNumWaypoints01 = avgNumWaypoints01 / len(analysisData01)
     avgError01 = avgError01 / len(analysisData01)
     avgVelo01 = avgVelo01 / len(analysisData01)
     avgAcc01 = avgAcc01 / len(analysisData01)
     avgJerk01 = avgJerk01 / len(analysisData01)
+    avgDistance01 = avgDistance01 / len(analysisData01)
+    avgTime01 = avgTime01 / len(analysisData01)
 
     avgNumWaypoints02 = 0
     avgError02 = 0
     avgVelo02 = 0
     avgAcc02 = 0
     avgJerk02 = 0
+    avgDistance02 = 0
+    avgTime02 = 0
     for i in range(0, len(analysisData02)):
         avgNumWaypoints02 += analysisData02[i][0]
         avgError02 += analysisData02[i][1]
         avgVelo02 += analysisData02[i][2]
         avgAcc02 += analysisData02[i][3]
         avgJerk02 += analysisData02[i][4]
+        avgDistance02 += analysisData02[i][5]
+        avgTime02 += analysisData02[i][6]
     avgNumWaypoints02 = avgNumWaypoints02 / len(analysisData02)
     avgError02 = avgError02 / len(analysisData02)
     avgVelo02 = avgVelo02 / len(analysisData02)
     avgAcc02 = avgAcc02 / len(analysisData02)
     avgJerk02 = avgJerk02 / len(analysisData02)
-    avgs01 = [avgNumWaypoints01, avgError01, avgVelo01, avgAcc01, avgJerk01]
-    avgs02 = [avgNumWaypoints02, avgError02, avgVelo02, avgAcc02, avgJerk02]
+    avgDistance02 = avgDistance02 / len(analysisData02)
+    avgTime02 = avgTime02 / len(analysisData02)
+    avgs01 = [avgNumWaypoints01, avgError01, avgVelo01, avgAcc01, avgJerk01, avgDistance01, avgTime01]
+    avgs02 = [avgNumWaypoints02, avgError02, avgVelo02, avgAcc02, avgJerk02, avgDistance02, avgTime02]
     return avgs01, avgs02
