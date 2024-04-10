@@ -94,7 +94,7 @@ def getLazerClusters(df, variable, centroid_bool = False):
     
     for i in range(0,len(wcss)-1):
         if (wcss[i]-wcss[i+1])/wcss[i] < 0.2:
-            num = i+1
+            num = i
             # print(f"Num Clusters {variable}",i)
             break
     kmeans = KMeans(n_clusters=num, n_init=12, random_state=0).fit(data)
@@ -159,7 +159,7 @@ def removeZeros(csv, var):
 
 def getCsvData(directory, case):
     # case is a string and is either: haptic, hololens, nothing, everything, or minimap
-    caseUsers = directory + '//' + case
+    caseUsers = directory + '\\' + case
 
     files = os.listdir(caseUsers)
     folders = []
@@ -170,16 +170,17 @@ def getCsvData(directory, case):
     for i in range(0, len(folders)):
         csv_and_meta_files = os.listdir(folders[i])
         for j in csv_and_meta_files:
-            print(j)
             if 'meta' in j:
                 pass
             elif j == 'recordedData01.csv':
                 print('processing recordedData01')
-                laser_df01 = removeZeros(j, 'RayCast')
+                csvPath = folders[i] + '\\' + j
+                print(csvPath)
+                laser_df01 = removeZeros(csvPath, 'RayCast')
                 laser_clust01 = getLazerClusters(laser_df01, 'RayCast')
                 laser_centroids01 = laser_clust01[1]
 
-                waypoint_df01 = removeZeros(j, 'BlueSphere')
+                waypoint_df01 = removeZeros(csvPath, 'BlueSphere')
                 waypoint_clust01 = getLazerClusters(waypoint_df01, 'BlueSphere')
                 waypoint_centroids01 = waypoint_clust01[1]
                 
@@ -194,11 +195,13 @@ def getCsvData(directory, case):
 
             elif j == 'recordedData02.csv':
                 print('processing recordedData02')
-                laser_df02 = removeZeros(j, 'RayCast')
+                csvPath = folders[i] + '\\' + j
+                print(csvPath)
+                laser_df02 = removeZeros(csvPath, 'RayCast')
                 laser_clust02 = getLazerClusters(laser_df02, 'RayCast')
                 laser_centroids02 = laser_clust02[1]
 
-                waypoint_df02 = removeZeros(j, 'BlueSphere')
+                waypoint_df02 = removeZeros(csvPath, 'BlueSphere')
                 waypoint_clust02 = getLazerClusters(waypoint_df02, 'BlueSphere')
                 waypoint_centroids02 = waypoint_clust02[1]
 
