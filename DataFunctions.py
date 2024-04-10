@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 import warnings
 from sklearn.exceptions import ConvergenceWarning
+import math
 
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
@@ -51,9 +52,12 @@ def getLazerClusters(df, variable, centroid_bool = False):
     # ONLY NEED TO LOOK AT X AND Z COORDINATES
     # if time:
         # data = new_df[['Time', variableX, variableZ]]
-    data = new_df[[variableZ,variableX]]
+    data = new_df[[variableX,variableZ]]
+    num_samples = data.shape[0]
+    max_clusters = min(num_samples, 30)
     wcss = []
-    for i in range(1, 30):
+        
+    for i in range(1, max_clusters):
         kmeans = KMeans(n_clusters=i, n_init=12, random_state=0).fit(data)
         wcss.append(kmeans.inertia_)
         n_clusters = len(set(kmeans.labels_)) - (1 if -1 in kmeans.labels_ else 0)
@@ -275,75 +279,133 @@ def getCsvData(directory, case):
                     print('\nnumber of waypoints: ', numWaypoints02, "\nnumber of waypoint centroids: ", len(waypoint_centroids02), 
                         "\nnumber of laser centroids: ", len(laser_centroids02))
 
-    avgNumWaypoints01 = 0
-    avgError01 = 0
-    avgVelo01 = 0
-    avgAcc01 = 0
-    avgJerk01 = 0
-    avgDistance01 = 0
-    avgTime01 = 0
-    avgWaypointErrorComp01 = 0
-    avgLaserErrorComp01 = 0
-    for i in range(0, len(analysisData01)):
-        avgNumWaypoints01 += analysisData01[i][0]
-        avgError01 += analysisData01[i][1]
-        avgVelo01 += analysisData01[i][2]
-        avgAcc01 += analysisData01[i][3]
-        avgJerk01 += analysisData01[i][4]
-        avgDistance01 += analysisData01[i][5]
-        avgTime01 += analysisData01[i][6]
-        avgWaypointErrorComp01 += analysisData01[i][7]
-        avgLaserErrorComp01 += analysisData01[i][8]
+    # Assuming analysisData01 is your dataset and is already defined
+    n = len(analysisData01)  # Number of observations
 
-    avgNumWaypoints01 = avgNumWaypoints01 / len(analysisData01)
-    avgError01 = avgError01 / len(analysisData01)
-    avgVelo01 = avgVelo01 / len(analysisData01)
-    avgAcc01 = avgAcc01 / len(analysisData01)
-    avgJerk01 = avgJerk01 / len(analysisData01)
-    avgDistance01 = avgDistance01 / len(analysisData01)
-    avgTime01 = avgTime01 / len(analysisData01)
-    avgWaypointErrorComp01 = avgWaypointErrorComp01 / len(analysisData01)
-    avgLaserErrorComp01 = avgLaserErrorComp01 / len(analysisData01)
+    # Initialize sums for averages
+    sumNumWaypoints01 = sumError01 = sumVelo01 = sumAcc01 = sumJerk01 = sumDistance01 = sumTime01 = sumWaypointErrorComp01 = sumLaserErrorComp01 = 0
 
-    avgNumWaypoints02 = 0
-    avgError02 = 0
-    avgVelo02 = 0
-    avgAcc02 = 0
-    avgJerk02 = 0
-    avgDistance02 = 0
-    avgTime02 = 0
-    avgWaypointErrorComp02 = 0
-    avgLaserErrorComp02 = 0
-    for i in range(0, len(analysisData02)):
-        avgNumWaypoints02 += analysisData02[i][0]
-        avgError02 += analysisData02[i][1]
-        avgVelo02 += analysisData02[i][2]
-        avgAcc02 += analysisData02[i][3]
-        avgJerk02 += analysisData02[i][4]
-        avgDistance02 += analysisData02[i][5]
-        avgTime02 += analysisData02[i][6]
-        avgWaypointErrorComp02 += analysisData02[i][7]
-        avgLaserErrorComp02 += analysisData02[i][8]
+    # Initialize sums for standard deviation calculations (sum of squared deviations)
+    sq_dev_NumWaypoints01 = sq_dev_Error01 = sq_dev_Velo01 = sq_dev_Acc01 = sq_dev_Jerk01 = sq_dev_Distance01 = sq_dev_Time01 = sq_dev_WaypointErrorComp01 = sq_dev_LaserErrorComp01 = 0
 
-    avgNumWaypoints02 = avgNumWaypoints02 / len(analysisData02)
-    avgError02 = avgError02 / len(analysisData02)
-    avgVelo02 = avgVelo02 / len(analysisData02)
-    avgAcc02 = avgAcc02 / len(analysisData02)
-    avgJerk02 = avgJerk02 / len(analysisData02)
-    avgDistance02 = avgDistance02 / len(analysisData02)
-    avgTime02 = avgTime02 / len(analysisData02)
-    avgWaypointErrorComp02 = avgWaypointErrorComp02 / len(analysisData02)
-    avgLaserErrorComp02 = avgLaserErrorComp02 / len(analysisData02)
+    # Calculate sums for averages
+    for i in range(n):
+        sumNumWaypoints01 += analysisData01[i][0]
+        sumError01 += analysisData01[i][1]
+        sumVelo01 += analysisData01[i][2]
+        sumAcc01 += analysisData01[i][3]
+        sumJerk01 += analysisData01[i][4]
+        sumDistance01 += analysisData01[i][5]
+        sumTime01 += analysisData01[i][6]
+        sumWaypointErrorComp01 += analysisData01[i][7]
+        sumLaserErrorComp01 += analysisData01[i][8]
 
+    # Calculate averages
+    avgNumWaypoints01 = sumNumWaypoints01 / n
+    avgError01 = sumError01 / n
+    avgVelo01 = sumVelo01 / n
+    avgAcc01 = sumAcc01 / n
+    avgJerk01 = sumJerk01 / n
+    avgDistance01 = sumDistance01 / n
+    avgTime01 = sumTime01 / n
+    avgWaypointErrorComp01 = sumWaypointErrorComp01 / n
+    avgLaserErrorComp01 = sumLaserErrorComp01 / n
 
-    avgs01 = [avgNumWaypoints01, avgError01, avgVelo01, avgAcc01, avgJerk01, avgDistance01, avgTime01, avgWaypointErrorComp01, avgLaserErrorComp01]
-    avgs02 = [avgNumWaypoints02, avgError02, avgVelo02, avgAcc02, avgJerk02, avgDistance02, avgTime02, avgWaypointErrorComp02, avgLaserErrorComp02]
+    # Calculate squared deviations from the mean
+    for i in range(n):
+        sq_dev_NumWaypoints01 += (analysisData01[i][0] - avgNumWaypoints01) ** 2
+        sq_dev_Error01 += (analysisData01[i][1] - avgError01) ** 2
+        sq_dev_Velo01 += (analysisData01[i][2] - avgVelo01) ** 2
+        sq_dev_Acc01 += (analysisData01[i][3] - avgAcc01) ** 2
+        sq_dev_Jerk01 += (analysisData01[i][4] - avgJerk01) ** 2
+        sq_dev_Distance01 += (analysisData01[i][5] - avgDistance01) ** 2
+        sq_dev_Time01 += (analysisData01[i][6] - avgTime01) ** 2
+        sq_dev_WaypointErrorComp01 += (analysisData01[i][7] - avgWaypointErrorComp01) ** 2
+        sq_dev_LaserErrorComp01 += (analysisData01[i][8] - avgLaserErrorComp01) ** 2
+
+    # Calculate standard deviations
+    stdNumWaypoints01 = math.sqrt(sq_dev_NumWaypoints01 / n)
+    stdError01 = math.sqrt(sq_dev_Error01 / n)
+    stdVelo01 = math.sqrt(sq_dev_Velo01 / n)
+    stdAcc01 = math.sqrt(sq_dev_Acc01 / n)
+    stdJerk01 = math.sqrt(sq_dev_Jerk01 / n)
+    stdDistance01 = math.sqrt(sq_dev_Distance01 / n)
+    stdTime01 = math.sqrt(sq_dev_Time01 / n)
+    stdWaypointErrorComp01 = math.sqrt(sq_dev_WaypointErrorComp01 / n)
+    stdLaserErrorComp01 = math.sqrt(sq_dev_LaserErrorComp01 / n)
+    
+    # Assuming analysisData02 is your dataset and is already defined
+    n = len(analysisData02)  # Number of observations
+
+    # Initialize sums for averages
+    sumNumWaypoints02 = sumError02 = sumVelo02 = sumAcc02 = sumJerk02 = sumDistance02 = sumTime02 = sumWaypointErrorComp02 = sumLaserErrorComp02 = 0
+
+    # Initialize sums for standard deviation calculations (sum of squared deviations)
+    sq_dev_NumWaypoints02 = sq_dev_Error02 = sq_dev_Velo02 = sq_dev_Acc02 = sq_dev_Jerk02 = sq_dev_Distance02 = sq_dev_Time02 = sq_dev_WaypointErrorComp02 = sq_dev_LaserErrorComp02 = 0
+
+    # Calculate sums for averages
+    for i in range(n):
+        sumNumWaypoints02 += analysisData02[i][0]
+        sumError02 += analysisData02[i][1]
+        sumVelo02 += analysisData02[i][2]
+        sumAcc02 += analysisData02[i][3]
+        sumJerk02 += analysisData02[i][4]
+        sumDistance02 += analysisData02[i][5]
+        sumTime02 += analysisData02[i][6]
+        sumWaypointErrorComp02 += analysisData02[i][7]
+        sumLaserErrorComp02 += analysisData02[i][8]
+
+    # Calculate averages
+    avgNumWaypoints02 = sumNumWaypoints02 / n
+    avgError02 = sumError02 / n
+    avgVelo02 = sumVelo02 / n
+    avgAcc02 = sumAcc02 / n
+    avgJerk02 = sumJerk02 / n
+    avgDistance02 = sumDistance02 / n
+    avgTime02 = sumTime02 / n
+    avgWaypointErrorComp02 = sumWaypointErrorComp02 / n
+    avgLaserErrorComp02 = sumLaserErrorComp02 / n
+
+    # Calculate squared deviations from the mean
+    for i in range(n):
+        sq_dev_NumWaypoints02 += (analysisData02[i][0] - avgNumWaypoints02) ** 2
+        sq_dev_Error02 += (analysisData02[i][1] - avgError02) ** 2
+        sq_dev_Velo02 += (analysisData02[i][2] - avgVelo02) ** 2
+        sq_dev_Acc02 += (analysisData02[i][3] - avgAcc02) ** 2
+        sq_dev_Jerk02 += (analysisData02[i][4] - avgJerk02) ** 2
+        sq_dev_Distance02 += (analysisData02[i][5] - avgDistance02) ** 2
+        sq_dev_Time02 += (analysisData02[i][6] - avgTime02) ** 2
+        sq_dev_WaypointErrorComp02 += (analysisData02[i][7] - avgWaypointErrorComp02) ** 2
+        sq_dev_LaserErrorComp02 += (analysisData02[i][8] - avgLaserErrorComp02) ** 2
+
+    # Calculate standard deviations
+    stdNumWaypoints02 = math.sqrt(sq_dev_NumWaypoints02 / n)
+    stdError02 = math.sqrt(sq_dev_Error02 / n)
+    stdVelo02 = math.sqrt(sq_dev_Velo02 / n)
+    stdAcc02 = math.sqrt(sq_dev_Acc02 / n)
+    stdJerk02 = math.sqrt(sq_dev_Jerk02 / n)
+    stdDistance02 = math.sqrt(sq_dev_Distance02 / n)
+    stdTime02 = math.sqrt(sq_dev_Time02 / n)
+    stdWaypointErrorComp02 = math.sqrt(sq_dev_WaypointErrorComp02 / n)
+    stdLaserErrorComp02 = math.sqrt(sq_dev_LaserErrorComp02 / n)
+
+    avgs01 = [[avgNumWaypoints01,stdNumWaypoints01], [avgError01,stdError01], [avgVelo01, stdVelo01]
+              , [avgAcc01,stdAcc01], [avgJerk01,stdJerk01], [avgDistance01,stdDistance01]
+              , [avgTime01,stdTime01], [avgWaypointErrorComp01,stdWaypointErrorComp01]
+              , [avgLaserErrorComp01,stdLaserErrorComp01]]
+    avgs02 = [[avgNumWaypoints02,stdNumWaypoints02], [avgError02,stdError02], [avgVelo02, stdVelo02]
+                , [avgAcc02,stdAcc02], [avgJerk02,stdJerk02], [avgDistance02,stdDistance02]
+                , [avgTime02,stdTime02], [avgWaypointErrorComp02,stdWaypointErrorComp02]
+                , [avgLaserErrorComp02,stdLaserErrorComp02]]
+    # avgs02 = [avgNumWaypoints02, avgError02, avgVelo02, avgAcc02, avgJerk02, avgDistance02, avgTime02, avgWaypointErrorComp02, avgLaserErrorComp02]
     return avgs01, avgs02, optimalDataComp01, optimalDataComp02
 
 def plotData(directory, case):
+    curdir = os.getcwd()
+    print(curdir)
     caseUsers = directory + '\\' + case
-    optimalCsvFile01 = directory + '\\tristanOptimalPath\\recordedData01.csv'
-    optimalCsvFile02 = directory + '\\tristanOptimalPath\\recordedData02.csv'
+    optimalCsvFile01 = curdir + '\\testSubjecPathData\\tristanOptimalPath\\recordedData01.csv'
+    optimalCsvFile02 = curdir + '\\testSubjecPathData\\tristanOptimalPath\\recordedData02.csv'
     files = os.listdir(caseUsers)
     folders = []
     fig1 = plt.figure()
@@ -372,13 +434,9 @@ def plotData(directory, case):
                     new_df1.loc[:, 'RayCastX'] = round(new_df1.loc[:, 'RayCastX'], 3)
                     # Assuming 'df' is your DataFrame and 'col' is the column where you want to remove duplicates
                     new_df1 = new_df1.drop_duplicates(subset='RayCastX', keep='first')
-                    mask1_wp = (df2['BlueSphereX'] != 0) & (df2['BlueSphereY'] != 0) & (df2['BlueSphereZ'] != 0)
-                    new_df1_wp = df2[mask1_wp].reset_index(drop=True)
-                    new_df1_wp.loc[:, 'BlueSphereX'] = round(new_df1_wp.loc[:, 'BlueSphereX'], 3)
-                    # Assuming 'df' is your DataFrame and 'col' is the column where you want to remove duplicates
-                    new_df1_wp = new_df1_wp.drop_duplicates(subset='BlueSphereX', keep='first')
-                    # df1s[f'new_df{iteration}'] = new_df1
+                    spheres = getBSpheres(df1)[1]
                     df1s.append(new_df1)
+                    df1s_wp.append(spheres)
 
                 # ax1.scatter(new_df1['RayCastX'], new_df1['RayCastZ'],label = 'novice')
             elif j == 'recordedData02.csv':
@@ -390,15 +448,10 @@ def plotData(directory, case):
                     new_df2.loc[:, 'RayCastX'] = round(new_df2.loc[:, 'RayCastX'], 3)
                     # Assuming 'df' is your DataFrame and 'col' is the column where you want to remove duplicates
                     new_df2 = new_df2.drop_duplicates(subset='RayCastX', keep='first')
-                    mask2_wp = (df2['BlueSphereX'] != 0) & (df2['BlueSphereY'] != 0) & (df2['BlueSphereZ'] != 0)
-                    new_df2_wp = df2[mask2_wp].reset_index(drop=True)
-                    new_df2_wp.loc[:, 'BlueSphereX'] = round(new_df2.loc[:, 'BlueSphereX'], 3)
-                    # Assuming 'df' is your DataFrame and 'col' is the column where you want to remove duplicates
-                    new_df2_wp = new_df2_wp.drop_duplicates(subset='BlueSphereX', keep='first')
-                    # df2s[f'new_df{iteration}'] = new_df2
-                    # ax2.scatter(new_df2['RayCastX'], new_df2['RayCastZ'], label = 'novice')
+                    new_df1 = new_df1.drop_duplicates(subset='RayCastX', keep='first')
+                    spheres = getBSpheres(df2)[1]               
                     df2s.append(new_df2)
-                    df2s_wp.append(new_df2_wp)
+                    df2s_wp.append(spheres)
 
     df1 = pd.read_csv(optimalCsvFile01)
     mask1 = (df1['RayCastX'] != 0) & (df1['RayCastY'] != 0) & (df1['RayCastZ'] != 0)
@@ -406,7 +459,6 @@ def plotData(directory, case):
     coordinatesList = []
     # for df in df1s:
     #     print(isinstance(df, pd.DataFrame))
-
 
     all_dfs = pd.concat(df1s)
 
@@ -417,11 +469,20 @@ def plotData(directory, case):
     xy_pairs = list(grouped.itertuples(index=False, name=None))
     xs, ys = zip(*xy_pairs)
 
-    ax1.scatter(xs,ys, label = 'Combined Novice')
-    ax1.scatter(new_df1['RayCastX'], new_df1['RayCastZ'], label = 'expert')
+    allSpheres = pd.concat(df1s_wp)
+    sphereCentroids = getLazerClusters(allSpheres, 'BlueSphere')[1]
+
+    # ax1.scatter(xs_wp,ys_wp, label = 'waypoints')
+    sphereCentroidsExpert = getBSpheres(df1)[1]
+    
+    ax1.scatter(xs,ys, label = 'Averaged Novice Path')
+    ax1.scatter(new_df1['RayCastX'], new_df1['RayCastZ'], label = 'Expert Optimal Path')
+    ax1.scatter(sphereCentroids[:,0],sphereCentroids[:,1], label = 'Novice Waypoints')
+    ax1.scatter(sphereCentroidsExpert['BlueSphereX'],sphereCentroidsExpert['BlueSphereZ'], label = 'Expert Waypoints')
+
     ax1.set_xlabel('Horizontal Position on Placenta')  # Add your X-axis label here
     ax1.set_ylabel('Vertical Position on Placenta')  # Add your Y-axis label here
-    ax1.set_title('First Run (no assistance)')  # Add your title here
+    ax1.set_title('First Trial Laser Path (No Assistance)')  # Add your title here
     ax1.legend()  # This will add the legend to the plot
 
     all_dfs = pd.concat(df2s)
@@ -433,14 +494,25 @@ def plotData(directory, case):
     xy_pairs = list(grouped.itertuples(index=False, name=None))
     xs, ys = zip(*xy_pairs)
 
-    ax2.scatter(xs,ys, label = 'combined')
+    allSpheres = pd.concat(df2s_wp)
+    sphereCentroids = getLazerClusters(allSpheres, 'BlueSphere')[1]
+
+
+    # ax1.scatter(xs_wp,ys_wp, label = 'waypoints')
+    
+    # ax2.scatter(xs_wp,ys_wp, label = 'waypoints')
+    ax2.scatter(xs,ys, label = 'Averaged Novice Path')
     df2 = pd.read_csv(optimalCsvFile02)
     mask2 = (df2['RayCastX'] != 0) & (df2['RayCastY'] != 0) & (df2['RayCastZ'] != 0)
     new_df2 = df2[mask2].reset_index(drop=True)
-    ax2.scatter(new_df2['RayCastX'], new_df2['RayCastZ'], label = 'expert')
+    sphereCentroidsExpert = getBSpheres(df2)[1]
+
+    ax2.scatter(new_df2['RayCastX'], new_df2['RayCastZ'], label = 'Expert Optimal Path')
+    ax2.scatter(sphereCentroids[:,0],sphereCentroids[:,1], label = 'Novice Waypoints')
+    ax2.scatter(sphereCentroidsExpert['BlueSphereX'],sphereCentroidsExpert['BlueSphereZ'], label = 'Expert Waypoints')
     ax2.set_xlabel('Horizontal Position on Placenta')  # Add your X-axis label here
     ax2.set_ylabel('Vertical Position on Placenta')  # Add your Y-axis label here
-    ax2.set_title(f'Second Run ({case} assistance)')  # Add your title here
+    ax2.set_title(f'Second Trial Laser Path ({case} assistance)')  # Add your title here
     ax2.legend()  # This will add the legend to the plot
     
     return df1s, df2s
